@@ -1,6 +1,4 @@
 
-var http = require("http");
-
 // rate: times/second
 var Throttler = function(rate) {
     this.lastCheck = Date.now();
@@ -23,21 +21,4 @@ var Throttler = function(rate) {
     };
 };
 
-globalThrottler = new Throttler(1);
-
-http.createServer(function(req, res) {
-    var t = globalThrottler.throttle();
-
-    if (t > 0) {
-        res.writeHead(503, {"Content-Type": "text/plain"});
-        res.write("Service throttled.");
-        res.end(); 
-        return;
-    }
-    
-    res.writeHead(200, {"Content-Type": "text/plain"});
-    res.write("Hello World");
-    res.end(); 
-}).listen(8888);
-
-console.log("Server listening.");
+exports.Throttler = Throttler
