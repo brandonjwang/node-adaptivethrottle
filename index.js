@@ -36,6 +36,8 @@ var IPInfo = function(p) {
         if (this.numConnections > p.numConn) {
             return -1;
         }
+
+        return this.throttler.throttle();
     }
 };
 
@@ -51,30 +53,28 @@ var IPThrottler = function(rate, numConn) {
     // to make a request
     this.throttle = function(res) {
         var ip = res.connection.remoteAddress;
-        console.log("connection opened.");
         if (!(ip in this.ipInfo)) {
-            console.log("Creating ip info for ip "+ip);
             this.ipInfo[ip] = new IPInfo(this);
         }
 
-        var sleepTime = this.ipInfo[ip].throttle();
+        if (this.ipInfo[ip].deleteTimeout != null) {
+            clearTimeout(this.ipInfo[ip].deleteTimeout);
+        }
 
-        return sleepTime;
+        return this.ipInfo[ip].throttle();
     };
 
     this.markResponseEnd = function(res) {
-            var ip = res.connection.remoteAddress;
-            var ipInfo = this.ipInfo;
-            ipInfo[ip].numConnections--;
+        var ip = res.connection.remoteAddress;
+        var ipInfo = this.ipInfo;
+        ipInfo[ip].numConnections--;
 
-            if (ipInfo[ip].deleteTimeout != null) {
-                clearTimeout(ipInfo[ip].deleteTimeout);
-            }
-
+        if (ipInfo[ip].numConnections == 0) {
             ipInfo[ip].deleteTimeout = setTimeout(function() {
                 delete ipInfo[ip];
             }, this.deleteInterval);
         }
+    }
 
     this.removeIpInfo = function(ip) {
         delete this.ipInfo[ip];
