@@ -81,5 +81,35 @@ var IPThrottler = function(rate, numConn) {
     };
 };
 
+// path is a regexp, priority is the priority of the endpoint
+var EndpointInfo = function(path, priority) {
+    this.path = path;
+    this.beta = 1/priority;
+    this.instAvg = 0; // instantaneous time to 
+
+    this.calculateRate = function(L) {
+        return L / (this.beta * this.instAvg);
+    }
+}
+
+// takes an array of EndpointInfo
+var AdaptiveThrottler = function(infos) {
+    this.sumBeta = 0;
+    this.infos = infos;
+    this.avgResTime = 0;
+    this.targetResponseTime = 50;
+
+    for (i = 0; i<infos; ++i) {
+        this.sumBeta += infos[i].beta;
+    }
+
+    this.throttle = function(res) {
+        if (this.avgResTime > targetResponseTime) {
+        }
+    }
+}
+
 exports.Throttler = Throttler
 exports.IPThrottler = IPThrottler
+exports.EndpointInfo = EndpointInfo
+exports.AdaptiveThrottler = AdaptiveThrottler
