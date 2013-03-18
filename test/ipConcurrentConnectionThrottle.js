@@ -64,6 +64,7 @@ function makeReq(i) {
     setTimeout(function() {
         console.log("Requesting two concurrent longstanding requests. Second request should be throttled.");
         http.get(longOptions, function(res) {
+            console.log(res.statusCode);
             assert(res.statusCode == 200, "First request not returned with code 200.");
             console.log("OK. First long concurrent request returned OK. Test passed.");
             server.close();
