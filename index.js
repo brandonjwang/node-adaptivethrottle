@@ -1,5 +1,6 @@
 
 var url = require("url");
+var queue = require("./queue.js");
 
 // rate: times/second
 var Throttler = function(rate) {
@@ -114,6 +115,7 @@ var AdaptiveThrottler = function(infos) {
     this.sumBeta = 0;
     this.infos = infos;
     this.avgResTime = 0;
+    this.timeHistoryBuffer = new queue.Queue(100);
     this.targetResponseTime = 50;
     this.L = 0;
 
@@ -128,7 +130,6 @@ var AdaptiveThrottler = function(infos) {
 
         // Find the appropriate EndpointInfo
         var pathname = url.parse(req.url).pathname;
-        console.log(pathname);
         var epInfo = null;
         for (var i = 0; i < this.infos.length; ++i) {
             var info = this.infos[i];
@@ -142,14 +143,32 @@ var AdaptiveThrottler = function(infos) {
             throw new Error("Failed to find the appropriate endpoint for "+pathname);
         }
 
-        // 
+        // Mark the request with a timestamp
+        req.startTime = (new Date()).getTime();
 
+        //return epInfo.throttle(this.L);
         return 0;
     }
 
     this.markResponseEnd = function(req) {
+        var responseTime = (new Date()).getTime() - req.startTime;
+
         // Update avgResTime
-        
+        var oldNumElem = this.timeHistoryBuffer.numElements;
+        var removedTime = this.timeHistoryBuffer.push();
+        if (removedTime) {
+            this.avgResTime -= removedTime/this.timeHistoryBuffer.numElements;
+        }
+
+        // Normalize with new denominator
+        if (oldNumElem != this.timeHistoryBuffer.numElements) {
+            this.avgResTime = this.avgResTime * oldNumElem / this.timeHistoryBuffer.numElements;
+        }
+
+        this.avgResTime += responseTime / this.timeHistoryBuffer.numElements;
+
+        console.log("Avg Time: "+this.avgResTime+" Inst Time: "+responseTime);
+
         // Update endpoint response time
     }
 }
