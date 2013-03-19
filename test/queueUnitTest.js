@@ -2,13 +2,14 @@
 var assert = require("assert");
 var queue = require("../queue.js");
 
-x = new queue.Queue(10);
+size = 15;
+x = new queue.Queue(size);
 
-for (var i = 0; i < 100; ++i) {
+for (var i = 0; i < 10*size; ++i) {
     var v = x.push(i);
-    if (i > 10) {
+    if (i > size) {
         console.log(v);
-        assert(v%10 == (i-1)%10, "v="+v);
+        assert(v%10 == (i-size)%10, "v="+v);
     }
 }
 

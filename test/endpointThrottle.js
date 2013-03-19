@@ -46,20 +46,14 @@ options = {
     path: '/'
 }
 
-
-i = 0;
-function asf() {
-    if (i >= 1000) {
-        server.close();
-        return;
-    }
-    setTimeout(function() {
-        http.get(options, function(res) {
-            //console.log("Made request with response: "+res.statusCode);
-            i++;
-            asf();
-        });
-    }, 1000);
+var max = 1000;
+j = 0;
+for (var i=0; i<max; ++i) {
+    http.get(options, function(res) {
+        //console.log("Made request with response: "+res.statusCode);
+        if (++j == max) {
+            server.close();
+        }
+    });
 }
 
-asf();

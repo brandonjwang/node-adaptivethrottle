@@ -115,7 +115,8 @@ var AdaptiveThrottler = function(infos) {
     this.sumBeta = 0;
     this.infos = infos;
     this.avgResTime = 0;
-    this.timeHistoryBuffer = new queue.Queue(100);
+    //this.timeHistoryBuffer = new queue.Queue(100);
+    this.timeHistoryBuffer = new queue.Queue(3);
     this.targetResponseTime = 50;
     this.L = 0;
 
@@ -155,9 +156,9 @@ var AdaptiveThrottler = function(infos) {
 
         // Update avgResTime
         var oldNumElem = this.timeHistoryBuffer.numElements;
-        var removedTime = this.timeHistoryBuffer.push();
+        var removedTime = this.timeHistoryBuffer.push(responseTime);
         if (removedTime) {
-            this.avgResTime -= removedTime/this.timeHistoryBuffer.numElements;
+            this.avgResTime -= removedTime / oldNumElem;
         }
 
         // Normalize with new denominator

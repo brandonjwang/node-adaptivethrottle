@@ -7,23 +7,21 @@ var Queue = function(size) {
 
     this.size = size;
     this.buffer = new Array(size);
-    this.startIndex = 0;
-    this.endIndex = 0;
+    this.index = -1;
     this.numElements = 0;
 
-    // Pushes element onto the queue, if the number of elements exceeds the size, return the value
+    // Pushes element onto the queue, if the number of elements
+    // exceeds the size, return the value
     this.push = function(value) {
         var retVal = null;
-        this.numElements++;
-
-        if (this.numElements > this.size) {
-            retVal = this.buffer[this.startIndex];
-            this.startIndex = (this.startIndex + 1) % this.size;
-            this.numElements = this.size;
+        this.index = (this.index + 1) % this.size;
+        if (this.numElements == this.size) {
+            retVal = this.buffer[this.index];
+        } else {
+            this.numElements++;
         }
 
-        this.endIndex = (this.endIndex + 1) % this.size;
-        this.buffer[this.endIndex] = value;
+        this.buffer[this.index] = value;
 
         return retVal;
     }
