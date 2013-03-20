@@ -9,9 +9,16 @@ epThrottler = new throttler.AdaptiveThrottler([epInfo]);
 port = 8888
 
 server = http.createServer(function(req, res) {
+    var respond = function() {
+        res.writeHead(200, {"Content-Type": "text/plain"});
+        res.write("Hello World");
+        epThrottler.markResponseEnd(req);
+        res.end();
+    }
     var t = epThrottler.throttle(req);
 
     if (t != 0) {
+        throttler.d("Throttling Request");
         res.writeHead(503, {"Content-Type": "text/plain"});
         res.write("Service throttled.");
         epThrottler.markResponseEnd(req);
@@ -19,23 +26,15 @@ server = http.createServer(function(req, res) {
         return;
     }
 
-    /*
     var pathname = url.parse(req.url).pathname; 
     if (pathname == "/long") {
-        setTimeout(function() {
-            res.writeHead(200, {"Content-Type": "text/plain"});
-            res.write("Hello World");
-            epThrottler.markResponseEnd(req);
-            res.end();
-        }, 2000);
-
+        //setTimeout(function() { respond() }, Math.random()*100); // Add randomness
+        setTimeout(function() { respond() }, 50); // Add randomness
         return;
-    }*/
-
-    res.writeHead(200, {"Content-Type": "text/plain"});
-    res.write("Hello World");
-    epThrottler.markResponseEnd(req);
-    res.end(); 
+    } else {
+        throw new Error("fuck you bitch");
+    }
+    respond();
 });
 server.listen(port);
 console.log("Server listening.");
@@ -43,14 +42,14 @@ console.log("Server listening.");
 options = {
     host: "localhost",
     port: port,
-    path: '/'
+    path: '/long'
 }
 
-var max = 1000;
+var max = 100;
 j = 0;
 for (var i=0; i<max; ++i) {
     http.get(options, function(res) {
-        //console.log("Made request with response: "+res.statusCode);
+        //d("Made request with response: "+res.statusCode);
         if (++j == max) {
             server.close();
         }

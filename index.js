@@ -2,6 +2,13 @@
 var url = require("url");
 var queue = require("./queue.js");
 
+DEBUG = true;
+var d = function(l) {
+    if (DEBUG) {
+        console.log(l);
+    }
+}
+
 // rate: times/second
 var Throttler = function(rate) {
     this.lastCheck = Date.now();
@@ -10,14 +17,14 @@ var Throttler = function(rate) {
 
     // returns the amount of time someone needs to wait until they make a new request
     this.throttle = function(rate) {
-        if (rate) {
+        if (rate != null) {
             this.rate = rate;
         }
 
         var now = Date.now();
         var timePassed = now - this.lastCheck;
         this.lastCheck = now;
-        this.allowedOperations += timePassed/1000 * this.rate - 1;
+        this.allowedOperations += Math.round(timePassed/1000 * this.rate - 1);
 
         if (this.allowedOperations > rate) {
             this.allowedOperations = rate;
@@ -93,17 +100,38 @@ var EndpointInfo = function(path, priority) {
     if (typeof path == "string") {
         path = new RegExp(path);
     }
+
     this.path = path;
     this.beta = 1/priority;
-    this.instAvg = 0; // instantaneous time to complete a request
+    this.sumBeta = 0;
+    this.avgResTime = 1;
     this.throttler = new Throttler(0);
+    this.timeHistoryBuffer = new queue.Queue(10);
+    //this.timeHistoryBuffer = new queue.Queue(3);
 
-    this.calculateRate = function(L) {
-        return L / (this.beta * this.instAvg);
+    this.calculateRate = function(L, sumBeta) {
+        var alpha = this.beta / sumBeta;
+        return Math.round(L * alpha / this.avgResTime);
     }
 
-    this.throttle = function(L) {
-        return this.throttler(this.calculateRate(L));
+    this.throttle = function(L, sumBeta) {
+        var rate = this.calculateRate(L, sumBeta)
+        var time = this.throttler.throttle(rate);
+        return time;
+    }
+
+    this.addNewResponseTime = function(time) {
+        var oldNumElem = this.timeHistoryBuffer.numElements;
+        var removedTime = this.timeHistoryBuffer.push(time);
+        if (removedTime) {
+            this.avgResTime -= removedTime / oldNumElem;
+        }
+
+        if (oldNumElem != this.timeHistoryBuffer.numElements) {
+            this.avgResTime = this.avgResTime * oldNumElem / this.timeHistoryBuffer.numElements;
+        }
+
+        this.avgResTime += time / this.timeHistoryBuffer.numElements;
     }
 }
 
@@ -116,18 +144,21 @@ var AdaptiveThrottler = function(infos) {
     this.infos = infos;
     this.avgResTime = 0;
     //this.timeHistoryBuffer = new queue.Queue(100);
-    this.timeHistoryBuffer = new queue.Queue(3);
-    this.targetResponseTime = 50;
-    this.L = 0;
+    this.timeHistoryBuffer = new queue.Queue(10);
+    this.targetResponseTime = 10;
+    this.L = 100; // Load coefficient
+    this.learningRate = 1.5;
 
-    for (i = 0; i<infos; ++i) {
-        this.sumBeta += infos[i].beta;
+    // Calculate the sum of betas
+    for (var i = 0; i<this.infos.length; ++i) {
+        this.sumBeta += this.infos[i].beta;
     }
 
     this.throttle = function(req) {
         // Calculate new total allowed system load
         var percentDifference = (this.avgResTime - this.targetResponseTime)/this.targetResponseTime;
-        this.L = this.L*(1-percentDifference);
+
+        this.L = Math.max(this.L * (1-percentDifference), 1);
 
         // Find the appropriate EndpointInfo
         var pathname = url.parse(req.url).pathname;
@@ -146,9 +177,9 @@ var AdaptiveThrottler = function(infos) {
 
         // Mark the request with a timestamp
         req.startTime = (new Date()).getTime();
+        req.epInfo = epInfo;
 
-        //return epInfo.throttle(this.L);
-        return 0;
+        return epInfo.throttle(this.L, this.sumBeta);
     }
 
     this.markResponseEnd = function(req) {
@@ -168,13 +199,13 @@ var AdaptiveThrottler = function(infos) {
 
         this.avgResTime += responseTime / this.timeHistoryBuffer.numElements;
 
-        console.log("Avg Time: "+this.avgResTime+" Inst Time: "+responseTime);
-
         // Update endpoint response time
+        epInfo.addNewResponseTime(responseTime);
     }
 }
 
-exports.Throttler = Throttler
-exports.IPThrottler = IPThrottler
-exports.EndpointInfo = EndpointInfo
-exports.AdaptiveThrottler = AdaptiveThrottler
+exports.Throttler = Throttler;
+exports.IPThrottler = IPThrottler;
+exports.EndpointInfo = EndpointInfo;
+exports.AdaptiveThrottler = AdaptiveThrottler;
+exports.d = d;
