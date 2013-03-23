@@ -104,7 +104,7 @@ var EndpointInfo = function(path, priority) {
     this.path = path;
     this.beta = 1/priority;
     this.sumBeta = 0;
-    this.avgResTime = 1;
+    this.avgResTime = 10;
     this.throttler = new Throttler(0);
     this.timeHistoryBuffer = new queue.Queue(10);
     //this.timeHistoryBuffer = new queue.Queue(3);
@@ -144,7 +144,7 @@ var AdaptiveThrottler = function(infos) {
     this.infos = infos;
     this.avgResTime = 0;
     //this.timeHistoryBuffer = new queue.Queue(100);
-    this.timeHistoryBuffer = new queue.Queue(10);
+    this.timeHistoryBuffer = new queue.Queue(3);
     this.targetResponseTime = 10;
     this.L = 100; // Load coefficient
     this.learningRate = 1.5;
@@ -183,6 +183,7 @@ var AdaptiveThrottler = function(infos) {
     }
 
     this.markResponseEnd = function(req) {
+        var epInfo = req.epInfo;
         var responseTime = (new Date()).getTime() - req.startTime;
 
         // Update avgResTime
