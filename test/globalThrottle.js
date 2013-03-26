@@ -44,7 +44,7 @@ http.get(options, function(res) {
         setTimeout(function() {
             http.get(options, function(res) {
                 assert(res.statusCode == 200, "Request not returned with code 200.");
-                console.log("OK, test passed.");
+                console.log("OK. Test passed.");
                 server.close();
             });
         }, 2000);

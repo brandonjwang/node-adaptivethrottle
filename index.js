@@ -83,6 +83,7 @@ var IPThrottler = function(rate, numConn) {
         var ipInfo = this.ipInfo;
         ipInfo[ip].numConnections--;
 
+        // Delete information about this IP if we don't need it
         if (ipInfo[ip].numConnections == 0) {
             ipInfo[ip].deleteTimeout = setTimeout(function() {
                 delete ipInfo[ip];

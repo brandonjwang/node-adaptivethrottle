@@ -48,10 +48,10 @@ setTimeout(function() {
     http.get(options, function(res) {
         console.log(res.statusCode);
         assert(res.statusCode == 200, "Request not returned with code 200.");
-        console.log("First request responeded to properly, sending second request.");
+        console.log("OK. First request responeded to properly, sending second request.");
         http.get(options, function(res) {
             assert(res.statusCode == 503, "Request should have been throttled.");
-            console.log("Second request throttled. Test passed.");
+            console.log("OK. Second request throttled. Test passed.");
             server.close();
         });
     });

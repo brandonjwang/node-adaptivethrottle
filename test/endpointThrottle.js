@@ -8,7 +8,8 @@ var url = require("url");
 d = throttler.d;
 numReq = 1000;
 numEndpoints = 10;
-targetResponseTime = 1;
+targetResponseTime = 10;
+responseTime = targetResponseTime*1.10
 
 epInfos = [];
 for (var i = 0; i<numEndpoints; ++i) {
@@ -36,7 +37,7 @@ server = http.createServer(function(req, res) {
         return;
     }
 
-    setTimeout(function() { respond() }, targetResponseTime*1.01);
+    setTimeout(function() { respond() }, responseTime);
     return;
 });
 server.listen(port);
