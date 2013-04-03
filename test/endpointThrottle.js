@@ -6,7 +6,7 @@ var url = require("url");
 
 // SETTINGS
 d = throttler.d;
-numReq = 50500;
+numReq = 500;
 numEndpoints = 10;
 targetResponseTime = 10;
 responseTime = targetResponseTime*1.10
@@ -43,8 +43,9 @@ server = http.createServer(function(req, res) {
 server.listen(port);
 console.log("Server listening.");
 console.log("Making "+numReq+" requests to all endpoints");
-numServed = [];
-for (var i = 0; i<numEndpoints; ++i) { numServed.push(0); }
+
+numServed = []; // Keep track of how many requests per endpoint has been made
+for (var i = 0; i<numEndpoints; ++i) { numServed.push(0); } 
 
 k = 0;
 for (var i = 0; i<numReq; ++i) {
