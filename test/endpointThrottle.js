@@ -6,7 +6,7 @@ var url = require("url");
 
 // SETTINGS
 d = throttler.d;
-numReq = 1000;
+numReq = 50500;
 numEndpoints = 10;
 targetResponseTime = 10;
 responseTime = targetResponseTime*1.10

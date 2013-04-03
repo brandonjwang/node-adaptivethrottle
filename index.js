@@ -148,6 +148,7 @@ var AdaptiveThrottler = function(infos) {
     this.timeHistoryBuffer = new queue.Queue(3);
     this.targetResponseTime = 10;
     this.L = 100; // Load coefficient
+    this.maxL = this.L * this.L;
     this.learningRate = 1.5;
 
     // Calculate the sum of betas
@@ -159,7 +160,7 @@ var AdaptiveThrottler = function(infos) {
         // Calculate new total allowed system load
         var percentDifference = (this.avgResTime - this.targetResponseTime)/this.targetResponseTime;
 
-        this.L = Math.max(this.L * (1-percentDifference), 1);
+        this.L = Math.min(Math.max(this.L * (1-percentDifference), 1), this.maxL);
 
         // Find the appropriate EndpointInfo
         var pathname = url.parse(req.url).pathname;
