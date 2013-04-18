@@ -1,3 +1,7 @@
+// Copyright (c) 2013 Brandon Wang
+// 
+// See the file license.txt for copying permission.
+//
 
 var url = require("url");
 var queue = require("./queue.js");

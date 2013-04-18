@@ -1,3 +1,7 @@
+// Copyright (c) 2013 Brandon Wang
+// 
+// See the file license.txt for copying permission.
+//
 
 var http = require("http");
 var assert = require("assert");

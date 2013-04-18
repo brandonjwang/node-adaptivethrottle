@@ -1,3 +1,7 @@
+// Copyright (c) 2013 Brandon Wang
+// 
+// See the file license.txt for copying permission.
+//
 
 var http = require("http");
 var assert = require("assert");
@@ -9,7 +13,7 @@ d = throttler.d;
 numReq = 500;
 numEndpoints = 10;
 targetResponseTime = 10;
-responseTime = targetResponseTime*1.10
+responseTime = targetResponseTime*1.10;
 
 epInfos = [];
 for (var i = 0; i<numEndpoints; ++i) {

@@ -1,3 +1,7 @@
+// Copyright (c) 2013 Brandon Wang
+// 
+// See the file license.txt for copying permission.
+//
 
 // Simple implementation of a queue using a ring buffer implementation with maximum size of size
 
