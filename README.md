@@ -21,7 +21,9 @@ server = http.createServer(function(req, res) {
 });
 ```
 
-# In this project, the following JavaScript classes are publicly exposed:
+For usage of all classes, see the testcases written in /test. For an explanation of the math, justification, and so on, see report.pdf.
+
+In this project, the following JavaScript classes are publicly exposed:
 
 ## Throttler(rate)
 This class is a simple base class with one method that is used to determine if something is being used more often then rate. It can be used for a multitude of cases and is used internally to implement more sophisticated throttle classes. 
