@@ -1,6 +1,6 @@
 # Node.js Adaptive Throttling
 
-A suite of classes for Node.js used for throttling that I wrote for a university project. 
+A suite of classes for Node.js used for throttling that I wrote for a university project. The reason why you would want to use this project is that it includes an adaptive throttler that allowes developers to specify priorities of endpoints. This means, if your web application is being slammed, endpoints which are less important and expensive (ie. takes much time to compute) become throttled first.
 
 Example usage of a simple throttler: 
 
